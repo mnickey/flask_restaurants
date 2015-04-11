@@ -20,8 +20,8 @@ def index():
     restaurants = session.query(Restaurant).all()
     return render_template('final_main.html', restaurants=restaurants)
 
-@app.route('/restaurants/<int:restaurant_id>')
-@app.route('/restaurants/<int:restaurant_id>/menu')
+@app.route('/restaurants/<int:restaurant_id>/')
+@app.route('/restaurants/<int:restaurant_id>/menu/')
 # THIS IS A DUPLICATE ROUTE. @app.route combined in the showRestaurant function
 def showRestaurant(restaurant_id):
     """
@@ -32,7 +32,7 @@ def showRestaurant(restaurant_id):
     items = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
     return render_template('final_showrestaurant.html', restaurant = restaurant, items = items )
 
-@app.route('/restaurants/new', methods=['GET', 'POST'])
+@app.route('/restaurants/new/', methods=['GET', 'POST'])
 def newRestaurant():
     """
     :return: a form that allows the user to create a new restaurant
@@ -59,15 +59,38 @@ def editRestaurant(restaurant_id):
         session.commit()
         flash("Restaurant successfully edited")
         return redirect('/')
+    else:
+        return render_template('final_editrestaurant.html', restaurant=restaurant)
 
-@app.route('/restaurants/<int:restaurant_id>/delete')
+@app.route('/restaurants/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 def deleteRestaurant(restaurant_id):
     """
     :param restaurant_id:
     :return: allows the user to delete a restaurant
     """
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    return render_template('final_deleterestaurant.html', restaurant = restaurant )
+    if request.method == 'POST':
+        session.delete(restaurant)
+        session.commit()
+        flash("Restaurant successfully deleted")
+        return redirect("/")
+    else:
+        return render_template('final_deleterestaurant.html', restaurant = restaurant )
+
+@app.route('/restaurants/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
+def newMenuItem(restaurant_id):
+    """
+    :param restaurant_id:
+    :return: Allows the user to create a new menu item for the restaurant with the ID specified
+    """
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
+    if request.method == 'POST':
+        newItem = MenuItem(name=request.form['name'])
+        session.add(newItem)
+        session.commit()
+        return redirect( url_for('showRestaurant', restaurant_id = restaurant_id) )
+    else:
+        return render_template('final_newmenuitem.html', restaurant_id=restaurant_id)
 
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit')
 def editMenuItem(restaurant_id, menu_id):

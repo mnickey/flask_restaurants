@@ -9,13 +9,15 @@
             <h1> {{ restaurant.name }} </h1>
         </div>
         <div>
+            <form action="{{ url_for('deleteRestaurant', restaurant_id = restaurant.id) }}" method="post">
             <p>
                 You are about to delete the restaurant {{restaurant.name}}
                 <span>
                     <input class="danger" type="submit" value="Delete">
-                    <a href="#">Cancel</a>
+                    <a href="{{ url_for('index')}}">Cancel</a>
                 </span>
             </p>
+            </form>
         </div>
     </div>
     </body>

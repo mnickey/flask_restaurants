@@ -9,8 +9,7 @@
             <h1> {{ restaurant.name }} </h1>
         </div>
         <div>
-            <form action="{{ url_for('final_editRestaurant', restaurant_id = restaurant_id) }}" method="POST">
-
+            <form action="{{ url_for('editRestaurant', restaurant_id = restaurant.id) }}" method="post">
             <p>
                 Name:
                 <span>
