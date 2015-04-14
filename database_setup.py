@@ -51,4 +51,5 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 items = session.query(MenuItem).all()
 for item in items:
-    print item.name,
+    print item.name, item.restaurant
+

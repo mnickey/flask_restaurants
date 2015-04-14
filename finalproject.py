@@ -4,6 +4,7 @@ app = Flask(__name__)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
+from pprint import pprint as pp
 
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
@@ -86,13 +87,15 @@ def newMenuItem(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     if request.method == 'POST':
         newItem = MenuItem(name=request.form['name'])
+        newItem.restaurant_id = restaurant_id
         session.add(newItem)
         session.commit()
+        flash("New Menu Item Created")
         return redirect( url_for('showRestaurant', restaurant_id = restaurant_id) )
     else:
         return render_template('final_newmenuitem.html', restaurant_id=restaurant_id)
 
-@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit')
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/')
 def editMenuItem(restaurant_id, menu_id):
     """
     :param restaurant_id:
@@ -100,9 +103,17 @@ def editMenuItem(restaurant_id, menu_id):
     :return: Allows the user to edit a menu item
     """
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
-    editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
-    return render_template('final_editmenuitem.html', restaurant_id = restaurant_id,
-                           restaurant = restaurant, menu_id=menu_id, item = editedItem)
+    # print ("Restaurant info: {}").format(restaurant.id)
+    editedItem = session.query(MenuItem).filter_by(restaurant_id=restaurant.id, id=menu_id).one()
+    # editedItem = session.query(MenuItem).get(menu_id)
+    # editedItem = session.query(MenuItem).filter(restaurant.id == restaurant_id, MenuItem.id==menu_id).one()
+    if request.method == 'POST':
+        editedItem.name = request.form['name']
+        session.add(editedItem)
+        session.commit()
+        return redirect( url_for('showRestaurant', restaurant_id = restaurant_id ) )
+    else:
+        return render_template('final_editmenuitem.html', editedItem=editedItem, restaurant=restaurant )
 
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete')
 def deleteMenuItem(restaurant_id, menu_id):
