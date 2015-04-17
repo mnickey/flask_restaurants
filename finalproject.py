@@ -99,7 +99,7 @@ def newMenuItem(restaurant_id):
 def page_not_found(e):
     return render_template('404.html'), 404
 
-@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/')
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """
     :param restaurant_id:
