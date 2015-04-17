@@ -95,6 +95,10 @@ def newMenuItem(restaurant_id):
     else:
         return render_template('final_newmenuitem.html', restaurant_id=restaurant_id)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/')
 def editMenuItem(restaurant_id, menu_id):
     """
@@ -103,8 +107,8 @@ def editMenuItem(restaurant_id, menu_id):
     :return: Allows the user to edit a menu item
     """
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
-    # print ("Restaurant info: {}").format(restaurant.id)
-    editedItem = session.query(MenuItem).filter_by(restaurant_id=restaurant.id, id=menu_id).one()
+    editedItem = session.query(MenuItem).filter_by(id = menu_id).one()
+    # editedItem = session.query(MenuItem).filter_by(restaurant_id=restaurant.id, id=menu_id).one()
     # editedItem = session.query(MenuItem).get(menu_id)
     # editedItem = session.query(MenuItem).filter(restaurant.id == restaurant_id, MenuItem.id==menu_id).one()
     if request.method == 'POST':
