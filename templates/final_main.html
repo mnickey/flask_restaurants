@@ -1,13 +1,14 @@
 <html>
 <head>
-    <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">-->
     <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
     <body>
-    <div class="container">
+    <div class="container pane">
 
-        <div class="header">
+        <div class="header" style="margin-top: 25px">
+            <h1><p>Browse our restaurants and enjoy!</p></h1>
             <div class="flash">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -20,13 +21,20 @@
             {% endwith %}
             </div>
 
-            <a href="{{ url_for('newRestaurant') }}">Create New Restaurant</a>
-            {% for restaurant in restaurants %}
-                <li>
+            <div>
+                {% for restaurant in restaurants %}
+                <li class="a">
                     <a href="{{ url_for( 'showRestaurant', restaurant_id=restaurant.id ) }}"
-                    <strong>{{restaurant.name}}</strong>
+                    <h2><strong>{{restaurant.name}}</strong></h2>
                 </li>
             {% endfor %}
+            </div>
+
+            <div>
+                <br>
+                <a href="{{ url_for('newRestaurant') }}">Create New Restaurant</a>
+            </div>
+
         </div>
     </div>
     </body>

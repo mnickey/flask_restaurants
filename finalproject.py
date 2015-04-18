@@ -69,6 +69,7 @@ def deleteRestaurant(restaurant_id):
     :param restaurant_id:
     :return: allows the user to delete a restaurant
     """
+    # TODO Find a place to create a link for this route that makes sense
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     if request.method == 'POST':
         session.delete(restaurant)
@@ -138,7 +139,7 @@ def deleteMenuItem(restaurant_id, menu_id):
     if request.method == 'POST':
         session.delete(deletedItem)
         session.commit()
-        flash("Menu Item successfully deleted")
+        flash("Item successfully deleted")
         return redirect(url_for('showRestaurant', restaurant_id = restaurant_id))
     else:
         return render_template('final_deletemenuitem.html', item = deletedItem, restaurant = restaurant)
