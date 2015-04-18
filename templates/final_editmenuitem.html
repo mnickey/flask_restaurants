@@ -1,6 +1,7 @@
 <html>
-<head>
-    <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">-->
+<head lang="en">
+    <title>Edit Menu Item</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
 </head>
 
     <body>
@@ -14,13 +15,42 @@
 
         <div class="nameAndPrice">
             <form action="{{ url_for('editMenuItem', restaurant_id = restaurant.id, menu_id = editedItem.id) }}" method="post">
-            <p>Name:
+                <div>
                 <span>
+                    <p>Name:
                     <input type = 'text' size='30' name = 'name' placeholder = '{{ editedItem.name }}'>
+                    <br>
+                    </p>
+                    </span>
+                </div>
+                <div>
+                    <p>
+                    <span>
+                    Price: <input type = 'text' size='30' name = 'price' placeholder = '{{ editedItem.price }}'>
+                        </p>
+                    </span>
+
+                </div>
+                <div class="form-inline" style="margin: 5px">
+                        <label>Course:</label><br>
+                        <input type="radio" name="course" value="Appetizer">Appetizer
+                        <input type="radio" name="course" value="Beverage">Beverage
+                        <input type="radio" name="course" value="Dessert">Dessert
+                        <input type="radio" name="course" value="Entree">Entree
+                </div>
+                <div>
+                    <span>
+                        <p>Description: <br>
+                            <textarea rows="5" cols="30" name="description"  placeholder="{{ editedItem.description }}"></textarea>
+                    <!--Description: <input type="text" size='30' name = 'description' placeholder = '{{ editedItem.description }}'>-->
+                        </p>
+                    </span>
+                </div>
+
                     <input type='submit' value='Edit'>
                     <a href="{{ url_for('showRestaurant', restaurant_id = restaurant.id)}}">Cancel</a>
-                </span>
-            </p>
+
+
             </form>
         </div>
 

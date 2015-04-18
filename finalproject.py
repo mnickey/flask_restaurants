@@ -87,6 +87,9 @@ def newMenuItem(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     if request.method == 'POST':
         newItem = MenuItem(name=request.form['name'])
+        newItem.price = request.form['price']
+        newItem.description = request.form['description']
+        newItem.course = request.form['course']
         newItem.restaurant_id = restaurant_id
         session.add(newItem)
         session.commit()
@@ -113,13 +116,17 @@ def editMenuItem(restaurant_id, menu_id):
     # editedItem = session.query(MenuItem).filter(restaurant.id == restaurant_id, MenuItem.id==menu_id).one()
     if request.method == 'POST':
         editedItem.name = request.form['name']
+        editedItem.price = request.form['price']
+        editedItem.description = request.form['description']
+        editedItem.course = request.form['course']
         session.add(editedItem)
         session.commit()
+        flash("Item successfully edited")
         return redirect( url_for('showRestaurant', restaurant_id = restaurant_id ) )
     else:
         return render_template('final_editmenuitem.html', editedItem=editedItem, restaurant=restaurant )
 
-@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete')
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
     """
     :param restaurant_id:
@@ -128,7 +135,13 @@ def deleteMenuItem(restaurant_id, menu_id):
     """
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     deletedItem = session.query(MenuItem).filter_by(id=menu_id).one()
-    return render_template('final_deletemenuitem.html', item = deletedItem, restaurant = restaurant)
+    if request.method == 'POST':
+        session.delete(deletedItem)
+        session.commit()
+        flash("Menu Item successfully deleted")
+        return redirect(url_for('showRestaurant', restaurant_id = restaurant_id))
+    else:
+        return render_template('final_deletemenuitem.html', item = deletedItem, restaurant = restaurant)
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
