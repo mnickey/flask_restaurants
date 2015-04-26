@@ -6,7 +6,7 @@
 
     <body>
 
-    <div class="pane">
+    <div class="container">
         <div class="header">
             <h1>  {{ restaurant.name }}  </h1>
             <h2> {{ editedItem.name }}</h2>
@@ -18,7 +18,7 @@
                 <div>
                 <span>
                     <p>Name:
-                    <input type = 'text' size='30' name = 'name' placeholder = '{{ editedItem.name }}'>
+                    <input type = 'text' size='30' name = 'name' required="required" placeholder = '{{ editedItem.name }}'>
                     <br>
                     </p>
                     </span>
@@ -26,7 +26,7 @@
                 <div>
                     <p>
                     <span>
-                    Price: <input type = 'text' size='30' name = 'price' placeholder = '{{ editedItem.price }}'>
+                    Price: <input type = 'text' size='30' name = 'price' required="required" placeholder = '{{ editedItem.price }}'>
                         </p>
                     </span>
 
@@ -41,7 +41,7 @@
                 <div>
                     <span>
                         <p>Description: <br>
-                            <textarea rows="5" cols="30" name="description"  placeholder="{{ editedItem.description }}"></textarea>
+                            <textarea rows="5" cols="30" name="description" required="required" placeholder="{{ editedItem.description }}"></textarea>
                     <!--Description: <input type="text" size='30' name = 'description' placeholder = '{{ editedItem.description }}'>-->
                         </p>
                     </span>

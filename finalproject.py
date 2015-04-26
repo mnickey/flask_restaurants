@@ -6,11 +6,42 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
 from pprint import pprint as pp
 
+# Todo Add JSON with Jsonify for API integration
+# Todo Add authentication with flask-login
+
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+@app.route('/restaurants/JSON/', methods=['GET'])
+def restaurant_JSON():
+    """
+    :param restaurant_id:
+    :return: JSON representation of restaurants available.
+    """
+    restaurants = session.query(Restaurant)
+    return jsonify(Restaurant=[restaurant.serialize for restaurant in restaurants])
+
+@app.route('/restaurants/<int:restaurant_id>/menu/JSON/', methods=['GET'])
+def restaurant_menu(restaurant_id):
+    """
+    :param restaurant_id:
+    :return: shows all the menu items of a given restaurant by restaurant id.
+    """
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
+    return jsonify(MenuItem=[item.serialize for item in items])
+
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON/', methods=['GET'])
+def menuItemJSON(restaurant_id, menu_id):
+    """
+    :param restaurant_id:
+    :param menu_id:
+    :return: a specific menu item from a specific restaurant.
+    """
+    menuItem = session.query(MenuItem).filter_by(id=menu_id).one()
+    return jsonify(MenuItem=menuItem.serialize)
 
 @app.route('/')
 def index():
@@ -21,6 +52,7 @@ def index():
     restaurants = session.query(Restaurant).all()
     return render_template('final_main.html', restaurants=restaurants)
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/')
 @app.route('/restaurants/<int:restaurant_id>/menu/')
 # THIS IS A DUPLICATE ROUTE. @app.route combined in the showRestaurant function
@@ -33,6 +65,7 @@ def showRestaurant(restaurant_id):
     items = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
     return render_template('final_showrestaurant.html', restaurant = restaurant, items = items )
 
+@app.errorhandler(404)
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 def newRestaurant():
     """
@@ -47,6 +80,7 @@ def newRestaurant():
     else:
         return render_template('final_newrestaurant.html')
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/edit/', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
     """
@@ -63,6 +97,7 @@ def editRestaurant(restaurant_id):
     else:
         return render_template('final_editrestaurant.html', restaurant=restaurant)
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 def deleteRestaurant(restaurant_id):
     """
@@ -79,6 +114,7 @@ def deleteRestaurant(restaurant_id):
     else:
         return render_template('final_deleterestaurant.html', restaurant = restaurant )
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """
@@ -101,8 +137,14 @@ def newMenuItem(restaurant_id):
 
 @app.errorhandler(404)
 def page_not_found(e):
+    """
+    :param e for error code 404 Not Found:
+    :return: returns a 404 error page telling the user that there is nothing at the link they visited
+    Also has a return link to the main page.
+    """
     return render_template('404.html'), 404
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """
@@ -127,6 +169,7 @@ def editMenuItem(restaurant_id, menu_id):
     else:
         return render_template('final_editmenuitem.html', editedItem=editedItem, restaurant=restaurant )
 
+@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
     """

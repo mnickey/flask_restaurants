@@ -8,6 +8,7 @@
     <div class="container">
         <div class="header">
             <h1> {{ restaurant.name }} </h1>
+            <hr>
         </div>
 
         <div class="flash alert-info" >
@@ -23,9 +24,18 @@
         </div>
 
         <div>
-            <a type="button" href="{{ url_for('newMenuItem', restaurant_id = restaurant.id) }}">Create New Menu Item</a>
             <a type="button" href="{{ url_for('index') }}">Show All Restaurants</a>
         </div>
+
+        <div>
+            <p>
+                Placeholder spot for admin URLs
+            <a type="button" href="{{ url_for('newMenuItem', restaurant_id = restaurant.id) }}">Create New Menu Item</a>
+             | <a type="button" href="{{ url_for('index') }}">Edit Restaurant</a>
+             | <a type="button" href="{{ url_for('index') }}">Delete Restaurant</a>
+            </p>
+        </div>
+
         <div>
             {% for item in items %}
         <div class="nameAndPrice">

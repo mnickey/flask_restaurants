@@ -1,7 +1,7 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+    <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">-->
 </head>
 
     <body>
@@ -23,10 +23,17 @@
 
             <div>
                 {% for restaurant in restaurants %}
-                <li class="a">
-                    <a href="{{ url_for( 'showRestaurant', restaurant_id=restaurant.id ) }}"
-                    <h2><strong>{{restaurant.name}}</strong></h2>
-                </li>
+                <ul>
+                    <li class="a">
+                        <h4>
+                            <strong>
+                                <a href="{{ url_for( 'showRestaurant', restaurant_id=restaurant.id ) }}">
+                                    {{restaurant.name}}
+                                </a>
+                            </strong>
+                        </h4>
+                    </li>
+                </ul>
             {% endfor %}
             </div>
 
