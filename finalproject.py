@@ -86,6 +86,36 @@ def fbconnect():
     flash ("Now logged in as %s" % login_session['username'])
     return output
 
+@app.route('/fbdisconnect', methods=['GET', 'POST'])
+def fbdisconnect():
+
+    facebook_id = login_session['facebook_id']
+    url = 'https://graph.facebook.com/%s/permissions' % facebook_id
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[1]
+
+    if facebook_id is None:
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    if result['status'] == '200':
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['user_id']
+        del login_session['facebook_id']
+
+        response = make_response(json.dumps('User successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        flash("You have been logged out.")
+        return response
+    else:
+        response = make_response(json.dumps('Failed to revoke token for given user.'), 400)
+        response.headers['Content-Type'] = 'application/json'
+        flash("You could not be logged out. Result Status: %s" % (result['status']) )
+        return response
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     if request.args.get('state') != login_session['state']:
