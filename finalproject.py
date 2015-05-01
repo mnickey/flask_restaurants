@@ -52,6 +52,9 @@ def fbconnect():
 
     #strip expire tag from access token
     token = result.split("&")[0]
+    print "Token Split: {}".format(token)
+    the_access_token = token.split("=")[1]
+    print "the_access_token: {}".format(the_access_token)
 
     url = 'https://graph.facebook.com/v2.2/me?%s' % token
     h = httplib2.Http()
@@ -61,6 +64,7 @@ def fbconnect():
     login_session['username'] = data["name"]
     login_session['email'] = data["email"]
     login_session['facebook_id'] = data["id"]
+    login_session['access_token'] = the_access_token
 
     #Get user picture
     url = 'https://graph.facebook.com/v2.2/me/picture?%s&redirect=0&height=200&width=200' % token
@@ -89,25 +93,29 @@ def fbconnect():
 @app.route('/fbdisconnect', methods=['GET', 'POST', 'DELETE'])
 def fbdisconnect():
 
-    facebook_id = login_session['facebook_id']
-    # print "LOGIN SESSION: {}".format(login_session)
+    facebook_id = login_session.get('facebook_id')
+    access_token = login_session.get('access_token')
 
     if facebook_id is None:
         response = make_response(json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("User not connected.")
+        return redirect('/restaurants')
+        # return response
 
-    url = 'https://graph.facebook.com/%s/permissions' % facebook_id
-    h = httplib2.Http()
-    # headers = h.request(url, 'GET')[1]
+    else:
+        url = 'https://graph.facebook.com/%s/permissions?access_toke=%s' % (facebook_id, access_token)
+        h = httplib2.Http()
+        # headers = h.request(url, 'GET')[1]
+        result = h.request(url, 'DELETE')[1]
 
-    headers = h.request(url, 'DELETE')
-    # headers = json.loads(headers)
-    print "HEADERS: {}".format(headers)
+        print "This is the result from fbdisconnect: {}".format(result)
+        print login_session
+        print "You have been logged out."
 
-    # headers = json.loads(h.request(url, 'GET')[1])
-
-    if headers['status'] == '200':
+        # todo Facebook doesn't check for status codes so we need to find another way to take care of this.
+        # For now, we are not going to check the status code.
+        # if headers[0]['status'] == '200':
         del login_session['username']
         del login_session['email']
         del login_session['picture']
@@ -116,14 +124,15 @@ def fbdisconnect():
 
         response = make_response(json.dumps('User successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
-        flash("You have been logged out.")
-        return response
+        flash("Your FB login session has been removed and you have been logged out.")
+        return redirect('/restaurants')
+        # return response
 
-    else:
-        response = make_response(json.dumps('Failed to revoke token for given user.'), 400)
-        response.headers['Content-Type'] = 'application/json'
-        flash("You could not be logged out. Result Status: %s" % (headers['status']) )
-        return response
+    # else:
+    #     response = make_response(json.dumps('Failed to revoke token for given user.'), 400)
+    #     response.headers['Content-Type'] = 'application/json'
+    #     flash("You could not be logged out. Result Status: %s" % (headers[0]['status']) )
+    #     return response
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
