@@ -104,7 +104,7 @@ def fbdisconnect():
         # return response
 
     else:
-        url = 'https://graph.facebook.com/%s/permissions?access_toke=%s' % (facebook_id, access_token)
+        url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
         h = httplib2.Http()
         # headers = h.request(url, 'GET')[1]
         result = h.request(url, 'DELETE')[1]
@@ -140,6 +140,7 @@ def gconnect():
         response = make_response(json.dumps('Invalid state parameter'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
+
     code = request.data
     try:
         # Upgrade the auth code into a credentials object
@@ -287,7 +288,6 @@ def index():
     restaurants = session.query(Restaurant).all()
     return render_template('final_main.html', restaurants=restaurants)
 
-# @app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/')
 @app.route('/restaurants/<int:restaurant_id>/menu/')
 def showRestaurant(restaurant_id):
@@ -297,8 +297,12 @@ def showRestaurant(restaurant_id):
     """
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     items = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
-    # No creator needed since no changes are being made with this route.
-    return render_template('final_showrestaurant.html', restaurant = restaurant, items = items )
+    creator = getUserInfo(restaurant.user_id)
+    if 'user_id' not in login_session:
+        user = '' # Trying to enable guest mode
+    else:
+        user = getUserInfo(login_session['user_id'])
+    return render_template('final_showrestaurant.html', restaurant=restaurant, items=items, CREATOR=creator, User=user)
 
 @app.errorhandler(404)
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
@@ -333,7 +337,7 @@ def editRestaurant(restaurant_id):
 
     if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can edit the restaurant name.')
-        return render_template('final_showrestaurantmenu.html', restaurant = restaurant)
+        return render_template('final_showrestaurant.html', restaurant = restaurant)
 
     if request.method == 'POST':
         restaurant = Restaurant(request.form['name'], user_id = login_session['user_id'])
@@ -359,7 +363,7 @@ def deleteRestaurant(restaurant_id):
     creator = getUserInfo(restaurant.user_id)
     if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can delete a restaurant.')
-        return render_template('final_showrestaurantmenu.html', restaurant = restaurant)
+        return render_template('final_showrestaurant.html', restaurant = restaurant)
 
     if request.method == 'POST':
         session.delete(restaurant)
@@ -369,7 +373,6 @@ def deleteRestaurant(restaurant_id):
     else:
         return render_template('final_deleterestaurant.html', restaurant = restaurant )
 
-@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """
@@ -380,10 +383,11 @@ def newMenuItem(restaurant_id):
         return redirect('/login')
 
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
     creator = getUserInfo(restaurant.user_id)
-    if 'username' not in login_session or creator.id != restaurant.user_id:
+    if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can create a new menu item.')
-        return render_template('final_showrestaurantmenu.html', restaurant = restaurant)
+        return render_template('final_showrestaurant.html', restaurant=restaurant, items=items, CREATOR=creator)
 
     if request.method == 'POST':
         newItem = MenuItem(name=request.form['name'])
@@ -394,7 +398,7 @@ def newMenuItem(restaurant_id):
         newItem.user = login_session['user_id']
         session.add(newItem)
         session.commit()
-        flash("New Menu Item Created")
+        flash("New Menu Item Created", "success")
         return redirect( url_for('showRestaurant', restaurant_id = restaurant_id) )
     else:
         return render_template('final_newmenuitem.html', restaurant_id=restaurant_id)
@@ -420,10 +424,11 @@ def editMenuItem(restaurant_id, menu_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     editedItem = session.query(MenuItem).filter_by(id = menu_id).one()
     creator = getUserInfo(restaurant.user_id)
+    user = getUserInfo(login_session['user_id'])
 
-    if 'username' not in login_session or creator.id != restaurant.user_id:
+    if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can edit a menu item.')
-        return render_template('final_showrestaurantmenu.html', restaurant = restaurant)
+        return render_template('final_showrestaurant.html', restaurant=restaurant, User=user, CREATOR=creator)
 
     if request.method == 'POST':
         editedItem.name = request.form['name']
@@ -450,10 +455,11 @@ def deleteMenuItem(restaurant_id, menu_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     deletedItem = session.query(MenuItem).filter_by(id=menu_id).one()
     creator = getUserInfo(restaurant.user_id)
+    user = getUserInfo(login_session['user_id'])
 
-    if 'username' not in login_session or creator.id != restaurant.user_id:
+    if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can delete a menu item.')
-        return render_template('final_showrestaurantmenu.html', restaurant = restaurant)
+        return render_template('final_showrestaurant.html', restaurant=restaurant, User=user, CREATOR=creator)
 
     if request.method == 'POST':
         session.delete(deletedItem)

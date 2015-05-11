@@ -1,17 +1,15 @@
-<html>
-<head lang="en">
-    <title>Create New Menu Item</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
-</head>
-<body class="container">
+{% extends "Base.html" %}
+
+{% block content %}
+
 <h1>Create New Menu Item</h1>
-<form action=" {{ url_for('newMenuItem', restaurant_id = restaurant_id) }}" method="post">
+<form class="container" action=" {{ url_for('newMenuItem', restaurant_id = restaurant_id) }}" method="post">
     <p>
         New Menu Item Name: <input type="text" size="30" name="name" required="True">
     </p>
 
     <p>New Menu Item Type:
-        <span class="course form-inline" style="margin: 5px">
+        <span class="course form-inline" style="margin: 5px" >
                 <label>Appetizer <input type="radio" name="course" value="Appetizer"></label>
                 <label>Beverage <input type="radio" name="course" value="Beverage"></label>
                 <label>Dessert <input type="radio" name="course" value="Dessert"></label>
@@ -30,5 +28,4 @@
         <input type="submit" value="Create">
     <a href="{{ url_for('showRestaurant', restaurant_id = restaurant_id)}}">Cancel</a>
 </form>
-</body>
-</html>
+{% endblock %}

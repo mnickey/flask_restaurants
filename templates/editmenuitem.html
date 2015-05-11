@@ -1,5 +1,7 @@
-<html>
-<body>
+{% extends "Base.html" %}
+
+{% block content %}
+
 <form action= "{{url_for('editMenuItem', restaurant_id = restaurant_id, menu_id=item.id)}}" method = 'POST'>
 
 <p>Name:</p>
@@ -9,5 +11,5 @@
 <input type='submit' value='Edit'>
 
 <a href= '{{url_for('restaurantMenu', restaurant_id= item.restaurant_id)}}'>Cancel</a>
-</body>
-</html>
+</form>
+    {% endblock %}
