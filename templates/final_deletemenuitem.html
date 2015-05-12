@@ -1,14 +1,9 @@
-<html>
-<head lang="en">
-    <title>Delete Menu Item</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
-</head>
-<body>
+{% extends "Base.html" %}
+{% block content %}
+<div class="container">
     <h1> Are you sure you want to delete {{item.name}}? </h1>
     <form action="{{ url_for('deleteMenuItem',restaurant_id = item.restaurant_id, menu_id=item.id)}}" method = 'post'>
     <input type="submit" value="Delete">
-    <a href="#">Cancel</a>
-
-</body>
-
-</html>
+    <a href="{{ url_for('showRestaurant', restaurant_id=item.restaurant_id)}}">Cancel</a>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "Base.html" %}
+{% block content %}
+<div class="container">
+<form method="post">
+    Your email address<br/>
+    <input name="email_address" required="required" placeholder="you@example.com"><br/>
+    What would you like to say?<br/>
+    <textarea name="message" required="required" placeholder="How awesome is Udacity?"></textarea><br/>
+    <span>
+        <input type="submit" value="Talk to us!">
+        <a href="{{ url_for('index')}}">Cancel</a>
+    </span>
+</form>
+</div>
+{% endblock %}

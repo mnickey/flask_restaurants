@@ -13,13 +13,11 @@ from oauth2client.client import FlowExchangeError
 import httplib2
 import json
 import requests
+import smtplib
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
-# Todo Add authentication with flask-login
-
 engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 Base.metadata.bind = engine
-
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
@@ -395,7 +393,7 @@ def newMenuItem(restaurant_id):
         newItem.description = request.form['description']
         newItem.course = request.form['course']
         newItem.restaurant_id = restaurant_id
-        newItem.user = login_session['user_id']
+        # newItem.user = login_session['user_id']
         session.add(newItem)
         session.commit()
         flash("New Menu Item Created", "success")
@@ -487,6 +485,22 @@ def createUser(login_session):
     session.commit()
     user = session.query(User).filter_by(email = login_session['email']).one()
     return user.id
+
+@app.route('/contact/', methods=['GET', 'POST'])
+def contactUs():
+    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login('mnickey@gmail.com', 'qubjqsxsscqikwdj')
+    if request.method == 'POST':
+        fromAddress = request.form['email_address']
+        contactMessage = request.form['message']
+        mail.sendmail(fromAddress, 'mnickey@gmail.com', contactMessage + " " + fromAddress)
+        mail.close()
+        flash("Your message was successfully sent. Someone will get back to you as soon as possible.")
+        return redirect(url_for('index'))
+    else:
+        return render_template('finalContact.html')
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'

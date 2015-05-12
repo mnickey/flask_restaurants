@@ -1,10 +1,7 @@
-<html>
-<head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='bootstrap.min.css') }}">
-</head>
+{% extends "Base.html" %}
 
-    <body>
-    <div class="pane">
+{% block content %}
+    <div class="container">
         <div class="header">
             <h1> {{ restaurant.name }} </h1>
         </div>
@@ -17,11 +14,10 @@
                 </span>
                 <span>
                     <input type="submit" value="Change Name">
-                    <a href="{{ url_for('index')}}">Cancel</a>
+                    <a href="{{ url_for('showRestaurant', restaurant_id=restaurant.id)}}">Cancel</a>
                 </span>
             </p>
             </form>
         </div>
     </div>
-    </body>
-</html>
+{% endblock %}
