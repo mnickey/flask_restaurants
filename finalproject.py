@@ -13,7 +13,10 @@ import smtplib
 
 app = Flask(__name__)
 
+# Load client keys
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+
+# Create database engine
 engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
@@ -34,7 +37,8 @@ def showLogin():
 def fbconnect():
     """
     Creating a route to let the user connect with Facebook
-    :return:
+    :return: Once connected the user will see a message that they have been connected
+    The user will then be returned to the main page.
     """
     if request.args.get('state') !=login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -100,36 +104,27 @@ def fbdisconnect():
         response.headers['Content-Type'] = 'application/json'
         flash("User not connected.")
         return redirect('/restaurants')
-        # return response
 
     else:
         url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
         h = httplib2.Http()
-        # headers = h.request(url, 'GET')[1]
         result = h.request(url, 'DELETE')[1]
-
-        # For now, we are not going to check the status code.
-        # if headers[0]['status'] == '200':
-        # del login_session['username']
-        # del login_session['email']
-        # del login_session['picture']
-        # del login_session['user_id']
-        # del login_session['facebook_id']
+        # Resetting the user login with FB is now being done in the disconnect function.
+        # Items reset in the disconnect function are: ['username'], ['email'], ['picture'],
+        # ['user_id'] and ['facebook_id']
 
         response = make_response(json.dumps('User successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         flash("Your FB login session has been removed and you have been logged out.")
         return redirect('/restaurants')
-        # return response
-
-    # else:
-    #     response = make_response(json.dumps('Failed to revoke token for given user.'), 400)
-    #     response.headers['Content-Type'] = 'application/json'
-    #     flash("You could not be logged out. Result Status: %s" % (headers[0]['status']) )
-    #     return response
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    Connects the user with Google+ account
+    :return: Once connected this will return a flash message letting the user know they have connected
+    and redirect them to the main page.
+    """
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -230,13 +225,9 @@ def gdisconnect():
     result = h.request(url, 'GET')[0]
 
     if result['status'] == '200':
-        # Reset the user's session
-        # del login_session['credentials']
-        # del login_session['gplus_id']
-        # del login_session['username']
-        # del login_session['email']
-        # del login_session['picture']
-
+        # Reset the user's session -- now being done in the disconnect function
+        # Items removed in the disconnect function are: ['credentials'], ['gplus_id'], ['username']
+        # ['email'] and ['picture']
         response = make_response(json.dumps('User successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return  response
@@ -245,6 +236,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+# ***** JSON Routes *****
 @app.route('/restaurants/JSON/', methods=['GET'])
 def restaurant_JSON():
     """
@@ -258,7 +250,7 @@ def restaurant_JSON():
 def restaurant_menu(restaurant_id):
     """
     :param restaurant_id:
-    :return: shows all the menu items of a given restaurant by restaurant id.
+    :return: shows all the menu items of a given restaurant by restaurant id in JSON format
     """
     items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
     return jsonify(MenuItem=[item.serialize for item in items])
@@ -268,7 +260,7 @@ def menuItemJSON(restaurant_id, menu_id):
     """
     :param restaurant_id:
     :param menu_id:
-    :return: a specific menu item from a specific restaurant.
+    :return: a JSON representation of a specific menu item from a specific restaurant.
     """
     menuItem = session.query(MenuItem).filter_by(id=menu_id).one()
     return jsonify(MenuItem=menuItem.serialize)
@@ -303,7 +295,6 @@ def showRestaurant(restaurant_id):
         user = getUserInfo(login_session['user_id'])
     return render_template('final_showrestaurant.html', restaurant=restaurant, items=items, CREATOR=creator, User=user)
 
-@app.errorhandler(404)
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 def newRestaurant():
     """
@@ -321,7 +312,6 @@ def newRestaurant():
     else:
         return render_template('final_newrestaurant.html')
 
-@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/edit/', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
     """
@@ -347,7 +337,6 @@ def editRestaurant(restaurant_id):
     else:
         return render_template('final_editrestaurant.html', restaurant=restaurant)
 
-@app.errorhandler(404)
 @app.route('/restaurants/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 def deleteRestaurant(restaurant_id):
     """
@@ -380,9 +369,12 @@ def newMenuItem(restaurant_id):
     if 'username' not in login_session:
         return redirect('/login')
 
+    # Get the restaurant, items and creator
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     items = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
     creator = getUserInfo(restaurant.user_id)
+
+    # checks to see if the user is logged in or not
     if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can create a new menu item.')
         return render_template('final_showrestaurant.html', restaurant=restaurant, items=items, CREATOR=creator)
@@ -468,6 +460,10 @@ def deleteMenuItem(restaurant_id, menu_id):
         return render_template('final_deletemenuitem.html', item = deletedItem, restaurant = restaurant)
 
 def getUserID(email):
+    """
+    :param email:
+    :return: The user.id is returned based on the email address given
+    """
     try:
         user = session.query(User).filter_by(email = email).one()
         return user.id
@@ -475,10 +471,18 @@ def getUserID(email):
         return None
 
 def getUserInfo(user_id):
+    """
+    Helper function to get the user information based on user_id
+    :param user_id:
+    """
     user = session.query(User).filter_by(id = user_id).one()
     return user
 
 def createUser(login_session):
+    """
+    Gives the ability to create a new user.
+    :param login_session:
+    """
     newUser = User(name = login_session['username'], email = login_session['email'],
                    picture = login_session['picture'])
     session.add(newUser)
@@ -488,6 +492,11 @@ def createUser(login_session):
 
 @app.route('/contact/', methods=['GET', 'POST'])
 def contactUs():
+    """
+    Give the user a way to communicate with the creator of this site...ME!
+    P.S. This actually works so feel free to send an email if you're bored.
+    :return: A contact form to send mail to the creator ... ME!
+    """
     mail = smtplib.SMTP('smtp.gmail.com', 587)
     mail.ehlo()
     mail.starttls()
@@ -504,6 +513,12 @@ def contactUs():
 
 @app.route('/disconnect')
 def disconnect():
+    """
+    Give the ability to disconect a user after they have connected.
+    This will make use of the helper functions for both FB and G+, removing the proprietary login session information
+     then this will remove the login_session information that is common between the two.
+    :return:
+    """
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
