@@ -1,19 +1,17 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, jsonify, make_response
-app = Flask(__name__)
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem, User
-
-# New Imports
 from flask import session as login_session
-import random, string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
+import random, string
 import httplib2
 import json
 import requests
 import smtplib
+
+app = Flask(__name__)
 
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 engine = create_engine('sqlite:///restaurantmenuwithusers.db')
@@ -24,12 +22,20 @@ session = DBSession()
 #Create anti-forgery state token
 @app.route('/login')
 def showLogin():
+    """
+    Creating a route to let the user login with G+ or Facebook
+    :return: A HTML page that has options for the user to login with
+    """
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
+    """
+    Creating a route to let the user connect with Facebook
+    :return:
+    """
     if request.args.get('state') !=login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -45,14 +51,9 @@ def fbconnect():
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
-    #Use token to get user info from API
-    userinfo_url =  "https://graph.facebook.com/v2.2/me"
-
     #strip expire tag from access token
     token = result.split("&")[0]
-    print "Token Split: {}".format(token)
     the_access_token = token.split("=")[1]
-    print "the_access_token: {}".format(the_access_token)
 
     url = 'https://graph.facebook.com/v2.2/me?%s' % token
     h = httplib2.Http()
@@ -107,18 +108,13 @@ def fbdisconnect():
         # headers = h.request(url, 'GET')[1]
         result = h.request(url, 'DELETE')[1]
 
-        print "This is the result from fbdisconnect: {}".format(result)
-        print login_session
-        print "You have been logged out."
-
-        # todo Facebook doesn't check for status codes so we need to find another way to take care of this.
         # For now, we are not going to check the status code.
         # if headers[0]['status'] == '200':
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
-        del login_session['user_id']
-        del login_session['facebook_id']
+        # del login_session['username']
+        # del login_session['email']
+        # del login_session['picture']
+        # del login_session['user_id']
+        # del login_session['facebook_id']
 
         response = make_response(json.dumps('User successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
@@ -198,6 +194,7 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    login_session['provider'] = 'google'
 
     # Check to see if the user exists, if they do - continue, If they do not, create a user
     user_id = getUserID(login_session['email'])
@@ -234,11 +231,11 @@ def gdisconnect():
 
     if result['status'] == '200':
         # Reset the user's session
-        del login_session['credentials']
-        del login_session['gplus_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
+        # del login_session['credentials']
+        # del login_session['gplus_id']
+        # del login_session['username']
+        # del login_session['email']
+        # del login_session['picture']
 
         response = make_response(json.dumps('User successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
@@ -284,7 +281,11 @@ def index():
     :param -- none
     """
     restaurants = session.query(Restaurant).all()
-    return render_template('final_main.html', restaurants=restaurants)
+    if 'user_id' not in login_session:
+        user = '' # Trying to enable guest mode
+    else:
+        user = getUserInfo(login_session['user_id'])
+    return render_template('final_main.html', restaurants=restaurants, User=user)
 
 @app.route('/restaurants/<int:restaurant_id>/')
 @app.route('/restaurants/<int:restaurant_id>/menu/')
@@ -353,7 +354,6 @@ def deleteRestaurant(restaurant_id):
     :param restaurant_id:
     :return: allows the user to delete a restaurant
     """
-    # TODO Find a place to create a link for this route that makes sense
     if 'username' not in login_session:
         return redirect('/login')
 
@@ -501,6 +501,27 @@ def contactUs():
         return redirect(url_for('index'))
     else:
         return render_template('finalContact.html')
+
+@app.route('/disconnect')
+def disconnect():
+    if 'provider' in login_session:
+        if login_session['provider'] == 'google':
+            gdisconnect()
+            del login_session['gplus_id']
+            del login_session['credentials']
+        if login_session['provider'] == 'facebook':
+            fbdisconnect()
+            del login_session['facebook_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['user_id']
+        del login_session['provider']
+        flash("You have been successfully disconnected.")
+        return redirect(url_for('index'))
+    else:
+        flash("You were not logged in.")
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
