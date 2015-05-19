@@ -28,19 +28,20 @@ The authorization here is based on Goggles App Passwords, this allows the public
 6. In your web-browser navigate to `http://localhost:5000/restaurants/` or `http://localhost:5000`.  
 
 ####FILE MANIFEST  
--finalproject.py -- this is the main file that houses the logic of all the inner-workings. This file needs to be run to see the final result.  
--database_setup.py -- this is the database setup file.   
--lotsofmenus.py -- Once the database has been setup, this will populate seed data into the database and ready to display by `finalproject.py`.  
+*finalproject.py* -- this is the main file that houses the logic of all the inner-workings. This file needs to be run to see the final result.  
+*database_setup.py* -- this is the database setup file.   
+*lotsofmenus.py* -- Once the database has been setup, this will populate seed data into the database and ready to display by `finalproject.py`.  
 ###CONTACT INFORMATION  
 Feel free to contact me with any requests, questions or ideas at [mnickey@gmail.com](mailto:mnickey@gmail.com) .  
-###KNOWN BUGS & TROUBLESHOOTING###  
+###KNOWN BUGS & TROUBLESHOOTING  
 Please submit any bugs to the contact address above. I will address them as soon as I can.  
-###CREDITS & ACKNOWLEDGEMENTS###    
+###CREDITS & ACKNOWLEDGEMENTS    
 Special thanks goes to the team at Udacity for their constant professional help, my dog Anna for always knowing when it was time for a break, my lovely girlfriend, Rachelle, for letting me Rubber Duck this code with her.   
 ###PENDING FUTURE IMPROVEMENTS  
 In no particular order, the future improvements that will be implemented and are currently being addressed are:  
 - use of a login_required decorator -- the reason behind this is to reduce the amount of re-used code and make this DRY.  
 - Give the user an option to login without having to use either Facebook ro Google+.  
+
 ###CHANGELOG  
 For a changelog of all files, please view the history of this git repository.  
 
