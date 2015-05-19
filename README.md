@@ -13,9 +13,11 @@ The authorization here is based on Goggles App Passwords, this allows the public
 ### CONFIGURATION & INSTALLATION INSTRUCTIONS  
 #####To clone this project:  
 * Clone this repository from https://github.com/mnickey/flask_restaurants.git  
+
 #####Creating the database:  
 1. Inside your vagrant shell, create the database by typing `python database_setup.py`.  
 2. To populate the database with seed data, type `python lotsofmenus.py`.  
+
 ###OPERATING INSTRUCTIONS  
 #####To run:  
 1. CD to your vagrant shell  
@@ -24,6 +26,7 @@ The authorization here is based on Goggles App Passwords, this allows the public
 4. CD to the menu_app directory  
 5. Run the applicatin with `python finalproject.py`  
 6. In your web-browser navigate to `http://localhost:5000/restaurants/` or `http://localhost:5000`.  
+
 ####FILE MANIFEST  
 -finalproject.py -- this is the main file that houses the logic of all the inner-workings. This file needs to be run to see the final result.  
 -database_setup.py -- this is the database setup file.   
