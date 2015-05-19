@@ -176,7 +176,7 @@ def gconnect():
         return response
 
     # Store the access token in the session for later use.
-    login_session['credentials'] = credentials
+    login_session['credentials'] = credentials.to_json()
     login_session['gplus_id'] = gplus_id
 
     #Get user info
@@ -318,11 +318,12 @@ def editRestaurant(restaurant_id):
     :param restaurant_id:
     :return: allows the user to EDIT a restaurants name
     """
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    creator = getUserInfo(restaurant.user_id)
 
     if 'username' not in login_session:
         return redirect('/login')
+
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator = getUserInfo(restaurant.user_id)
 
     if 'username' not in login_session or creator.id != login_session['user_id']:
         flash('Only the creator of the restaurant can edit the restaurant name.')

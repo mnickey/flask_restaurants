@@ -56,7 +56,3 @@ class MenuItem(Base):
 # Ending of config for database
 engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 Base.metadata.create_all(engine)
-
-from sqlalchemy.orm import sessionmaker
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
