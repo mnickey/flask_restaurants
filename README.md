@@ -36,7 +36,7 @@ Feel free to contact me with any requests, questions or ideas at [mnickey@gmail.
 ###KNOWN BUGS & TROUBLESHOOTING  
 Please submit any bugs to the contact address above. I will address them as soon as I can.  
 ###CREDITS & ACKNOWLEDGEMENTS    
-Special thanks goes to the team at Udacity for their constant professional help, my dog Anna for always knowing when it was time for a break, my lovely girlfriend, Rachelle, for letting me Rubber Duck this code with her.   
+Special thanks goes to the team at Udacity for their constant professional help, my dog Anna for always knowing when it was time for a break, and most of all my lovely girlfriend, Rachelle, for letting me Rubber Duck this code with her (she's amazingly patient).   
 ###PENDING FUTURE IMPROVEMENTS  
 In no particular order, the future improvements that will be implemented and are currently being addressed are:  
 - use of a login_required decorator -- the reason behind this is to reduce the amount of re-used code and make this DRY.  
