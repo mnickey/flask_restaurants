@@ -9,6 +9,7 @@ _Areas that should be noticed are:_
 * The use of Facebook & Google+ login methods
 * The Contact Us button that will send an email (to me) when the proper authorization is given
 The authorization here is based on Goggles App Passwords, this allows the publication of a password based on a users application. I can verify that this works on MY system and will submit proof as needed.  
+
 ### CONFIGURATION & INSTALLATION INSTRUCTIONS  
 #####To clone this project:  
 * Clone this repository from https://github.com/mnickey/flask_restaurants.git  
